@@ -1,6 +1,6 @@
 class Graph:
-    def __init__(self, value):
-        self.value = value
+    def __init__(self, x, y):
+        self.value = (x, y)
         self.neighbor = []
-    def push(self, node):
-        self.neighbor.append(node)
+    def push(self, x, y):
+        self.neighbor.append((x, y))
