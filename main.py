@@ -1,18 +1,25 @@
 import pygame
-from level import map
+from level.gen import Spark
 
-pygame.init()
-screen = pygame.display.set_mode((720, 720))
-level = map.Map(screen)
-level.get_map()
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-    #screen.fill("purple")
-    level.draw()
-    pygame.display.flip()
+def main():
+    clock = pygame.time.Clock()
+    grid = None
+    running = True
+    obj = Spark()
 
-pygame.quit()
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    grid = obj.prim()
 
+        if grid is None:
+            grid = obj.prim()
+        
+        clock.tick(60)
+    pygame.quit()
+
+if __name__ == "__main__":
+    main()
