@@ -10,6 +10,9 @@ class Player:
         self.shot = False
         self.health = 100
         self.inventory = {"sonar": 3}
+        self.shot = False
+        self.fire_timer = 0
+        self.fire_cooldown = 200 # ms
 
     def movement(self):
         sin_a = math.sin(self.angle)
@@ -67,6 +70,20 @@ class Player:
     def update(self):
         self.movement()
         self.check_goal()
+        self.update_timers()
+
+    def update_timers(self):
+        if self.fire_timer > 0:
+            self.fire_timer -= self.game.delta_time
+            if self.fire_timer <= 0:
+                self.shot = False
+
+    def fire(self):
+        if not self.shot:
+            self.shot = True
+            self.fire_timer = self.fire_cooldown
+            # Hitscan check will go here once SpriteRenderer is updated
+            self.game.raycasting.check_hitscan()
 
     def check_goal(self):
         if self.map_pos == self.game.map.goal:
