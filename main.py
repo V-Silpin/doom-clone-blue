@@ -58,6 +58,7 @@ class Game:
             pygame.draw.rect(self.screen, (40, 40, 40), (0, HALF_HEIGHT, WIDTH, HEIGHT))
             self.raycasting.ray_cast()
             self.sprite_renderer.update()
+            self.ui.draw_crosshair()
             self.map.draw()
             self.player.draw()
             self.effects.draw()
@@ -71,6 +72,10 @@ class Game:
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 pygame.quit(); sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1 and self.state == PLAYING:
+                    self.player.fire()
+
             if event.type == pygame.KEYDOWN:
                 if self.state == MENU and event.key == pygame.K_RETURN: self.state = PLAYING
                 elif self.state == WIN and event.key == pygame.K_RETURN:
