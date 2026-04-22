@@ -7,6 +7,7 @@ class BaseModel(ABC):
         self.health = health
         self.strength = strength
         self.speed = speed
+        self.mask = None
         
     @abstractmethod
     def locomotion(self):
