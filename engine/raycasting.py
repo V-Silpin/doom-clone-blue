@@ -73,3 +73,24 @@ class RayCasting:
             self.game.screen.blit(wall_column, (ray * SCALE, HALF_HEIGHT - proj_height // 2))
             self.ray_casting_result.append((depth, proj_height, texture_id, offset, ray))
             ray_angle += DELTA_ANGLE
+
+    def check_hitscan(self):
+        # Check for sprites in the center of the screen
+        center_ray = NUM_RAYS // 2
+        wall_depth = self.ray_casting_result[center_ray][0]
+        
+        target_sprite = None
+        min_dist = wall_depth
+        
+        for sprite in self.game.sprite_renderer.sprites:
+            if sprite.alive and sprite.is_enemy:
+                # Check if sprite is centered horizontally
+                if abs(sprite.screen_x - HALF_WIDTH) < sprite.sprite_half_width:
+                    if sprite.dist < min_dist:
+                        min_dist = sprite.dist
+                        target_sprite = sprite
+        
+        if target_sprite:
+            target_sprite.health -= 50 # Standard damage
+            if target_sprite.health <= 0:
+                target_sprite.alive = False

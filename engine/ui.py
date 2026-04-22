@@ -16,13 +16,35 @@ class UI:
             return pygame.Surface((512, 512))
 
     def draw_weapon(self):
-        self.game.screen.blit(self.weapon_texture, (WIDTH // 2 - 256, HEIGHT - 512))
+        # Weapon bobbing
+        bob_offset = 0
+        if any(pygame.key.get_pressed()[k] for k in (pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d)):
+            bob_offset = math.sin(pygame.time.get_ticks() * 0.01) * 5
+        
+        # Recoil
+        recoil_offset = 0
+        if self.game.player.shot:
+            recoil_offset = 30 # Simple kickback
+            
+        self.game.screen.blit(self.weapon_texture, (WIDTH // 2 - 256, HEIGHT - 512 + bob_offset + recoil_offset))
+
+    def draw_crosshair(self):
+        color = 'white'
+        center = (WIDTH // 2, HEIGHT // 2)
+        pygame.draw.line(self.game.screen, color, (center[0] - 10, center[1]), (center[0] + 10, center[1]), 2)
+        pygame.draw.line(self.game.screen, color, (center[0], center[1] - 10), (center[0], center[1] + 10), 2)
 
     def draw_hud(self):
-        health_text = self.font.render(f'HEALTH: {self.game.player.health}', True, RED)
-        self.game.screen.blit(health_text, (20, HEIGHT - 50))
-        level_text = self.font.render(f'LEVEL: {self.game.current_level}', True, WHITE)
+        # Health Bar
+        pygame.draw.rect(self.game.screen, 'black', (20, HEIGHT - 50, 200, 30))
+        health_width = max(0, (self.game.player.health / 100) * 200)
+        pygame.draw.rect(self.game.screen, RED, (20, HEIGHT - 50, health_width, 30))
+        health_text = self.font.render('HEALTH', True, WHITE)
+        self.game.screen.blit(health_text, (25, HEIGHT - 52))
+
+        level_text = self.font.render(f'LVL: {self.game.current_level}', True, WHITE)
         self.game.screen.blit(level_text, (WIDTH // 2 - 50, HEIGHT - 50))
+        
         sonar_text = self.font.render(f'SONAR: {self.game.player.inventory["sonar"]}', True, CYAN)
         self.game.screen.blit(sonar_text, (WIDTH - 180, HEIGHT - 50))
 

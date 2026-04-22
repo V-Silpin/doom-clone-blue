@@ -7,6 +7,7 @@ class SpriteObject:
         self.game = game
         self.player = game.player
         self.x, self.y = pos
+        self.image_path = path
         try:
             self.image = pygame.image.load(path).convert_alpha()
         except:
@@ -19,6 +20,9 @@ class SpriteObject:
         self.sprite_half_width = 0
         self.SPRITE_SCALE = scale
         self.SPRITE_HEIGHT_SHIFT = shift
+        self.health = 100
+        self.alive = True
+        self.is_enemy = 'enemy' in path
 
     def get_sprite_projection(self):
         proj = SCREEN_DIST / self.norm_dist * self.SPRITE_SCALE
@@ -48,6 +52,32 @@ class SpriteObject:
 
     def update(self):
         self.get_sprite()
+        self.run_logic()
+
+    def run_logic(self):
+        if self.alive and self.is_enemy:
+            # Simple chase logic
+            dx, dy = self.player.x - self.x, self.player.y - self.y
+            dist = math.hypot(dx, dy)
+            if 1.0 < dist < 10.0: # Chase if in range
+                speed = 0.001 * self.game.delta_time
+                self.x += (dx / dist) * speed
+                self.y += (dy / dist) * speed
+            
+            if dist < 0.6: # Attack range
+                self.player.health -= 0.1 * self.game.delta_time
+                self.game.effects.trigger_damage_flash()
+                if self.player.health <= 0:
+                    self.game.state = 0 # Return to menu on death
+        
+        elif self.alive and not self.is_enemy:
+            # Item pickup logic
+            dx, dy = self.player.x - self.x, self.player.y - self.y
+            dist = math.hypot(dx, dy)
+            if dist < 0.5:
+                self.alive = False
+                if 'item' in self.image_path: # Assuming path is stored
+                    self.player.inventory['sonar'] += 1
 
 class SpriteRenderer:
     def __init__(self, game):
@@ -60,4 +90,5 @@ class SpriteRenderer:
     def update(self):
         self.sprites.sort(key=lambda s: s.dist, reverse=True)
         for sprite in self.sprites:
-            sprite.update()
+            if sprite.alive:
+                sprite.update()
