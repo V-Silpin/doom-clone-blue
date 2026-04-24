@@ -43,6 +43,14 @@ class Map:
                 grid[cy + (ny - cy) // 2][cx + (nx - cx) // 2] = 0
                 add_frontier(cy, cx, frontier)
 
+        # Add some rooms to make it more interesting
+        for _ in range(self.game.current_level + 2):
+            rw, rh = random.randint(2, 3), random.randint(2, 3)
+            rx, ry = random.randint(1, self.cols - rw - 1), random.randint(1, self.rows - rh - 1)
+            for j in range(ry, ry + rh):
+                for i in range(rx, rx + rw):
+                    grid[j][i] = 0
+
         self.world_map = {}
         empty_tiles = []
         for j, row in enumerate(grid):
@@ -81,14 +89,37 @@ class Map:
                 else: break
 
     def draw(self):
-        size = 8
+        size = 12 # Larger minimap tiles
+        offset_x, offset_y = 10, 10
+        
+        # Minimap background
+        bg_rect = pygame.Rect(offset_x, offset_y, self.cols * size, self.rows * size)
+        overlay = pygame.Surface((self.cols * size, self.rows * size))
+        overlay.set_alpha(150)
+        overlay.fill((30, 30, 30))
+        self.game.screen.blit(overlay, (offset_x, offset_y))
+        pygame.draw.rect(self.game.screen, 'cyan', bg_rect, 1) # border
+
         for j in range(self.rows):
             for i in range(self.cols):
                 if (i, j) in self.visible_map:
                     value = self.world_map.get((i, j))
-                    color = 'white' if not value else 'darkgray'
-                    pygame.draw.rect(self.game.screen, color, (i * size, j * size, size, size))
-                else:
-                    pygame.draw.rect(self.game.screen, (20, 20, 20), (i * size, j * size, size, size))
+                    if value:
+                        color = (100, 100, 100) # Wall
+                        pygame.draw.rect(self.game.screen, color, (offset_x + i * size, offset_y + j * size, size - 1, size - 1))
+                    else:
+                        color = (50, 50, 50) # Floor
+                        pygame.draw.rect(self.game.screen, color, (offset_x + i * size, offset_y + j * size, size - 1, size - 1))
+        
+        # Draw goal on minimap if revealed
         if self.goal in self.visible_map:
-            pygame.draw.circle(self.game.screen, 'gold', (self.goal[0] * size + size//2, self.goal[1] * size + size//2), size//2)
+            pygame.draw.circle(self.game.screen, 'gold', (offset_x + self.goal[0] * size + size//2, offset_y + self.goal[1] * size + size//2), size//3)
+
+        # Draw player on minimap
+        px, py = self.game.player.pos
+        pygame.draw.circle(self.game.screen, 'green', (offset_x + px * size, offset_y + py * size), size//3)
+        # Direction line
+        pygame.draw.line(self.game.screen, 'green', 
+                         (offset_x + px * size, offset_y + py * size),
+                         (offset_x + px * size + math.cos(self.game.player.angle) * 10,
+                          offset_y + py * size + math.sin(self.game.player.angle) * 10), 2)
