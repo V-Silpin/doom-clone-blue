@@ -9,7 +9,7 @@ class Player:
         self.angle = 0
         self.shot = False
         self.health = 100
-        self.inventory = {"sonar": 3}
+        self.inventory = {"sonar": 3, "ammo": 50}
         self.shot = False
         self.fire_timer = 0
         self.fire_cooldown = 200 # ms
@@ -80,8 +80,9 @@ class Player:
                 self.shot = False
 
     def fire(self):
-        if not self.shot:
+        if not self.shot and self.inventory.get("ammo", 0) > 0:
             self.shot = True
+            self.inventory["ammo"] -= 1
             self.fire_timer = self.fire_cooldown
             # Hitscan check will go here once SpriteRenderer is updated
             self.game.raycasting.check_hitscan()
