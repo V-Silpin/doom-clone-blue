@@ -21,6 +21,7 @@ class Game:
         self.delta_time = 1
         self.current_level = 1
         self.state = MENU
+        self.show_map = False
         self.new_game()
 
     def new_game(self):
@@ -80,6 +81,8 @@ class Game:
                 if self.state == MENU and event.key == pygame.K_RETURN: self.state = PLAYING
                 elif self.state == WIN and event.key == pygame.K_RETURN:
                     self.current_level = 1; self.new_game(); self.state = PLAYING
+                elif self.state == PLAYING and event.key == pygame.K_TAB:
+                    self.show_map = not self.show_map
 
     def run(self):
         while True:
