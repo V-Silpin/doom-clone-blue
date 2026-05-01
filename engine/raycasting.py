@@ -68,8 +68,37 @@ class RayCasting:
 
             depth *= math.cos(self.game.player.angle - ray_angle)
             proj_height = SCREEN_DIST / (depth + 0.0001)
-            wall_column = self.textures[texture_id].subsurface(offset * (texture_size - 1), 0, 1, texture_size)
-            wall_column = pygame.transform.scale(wall_column, (SCALE, int(proj_height)))
-            self.game.screen.blit(wall_column, (ray * SCALE, HALF_HEIGHT - proj_height // 2))
+
+            # draw projection with texture
+            wall_column = self.textures[texture_id].subsurface(
+                int(offset * (texture_size - 1)), 0, 1, texture_size
+            )
+            # Fix: Ensure proj_height is at least 1 and capped to reasonable size for performance
+            proj_height = min(int(proj_height), HEIGHT * 2) 
+            if proj_height > 0:
+                wall_column = pygame.transform.scale(wall_column, (SCALE, proj_height))
+                self.game.screen.blit(wall_column, (ray * SCALE, HALF_HEIGHT - proj_height // 2))
+            
             self.ray_casting_result.append((depth, proj_height, texture_id, offset, ray))
             ray_angle += DELTA_ANGLE
+
+    def check_hitscan(self):
+        # Check for sprites in the center of the screen
+        center_ray = NUM_RAYS // 2
+        wall_depth = self.ray_casting_result[center_ray][0]
+        
+        target_sprite = None
+        min_dist = wall_depth
+        
+        for sprite in self.game.sprite_renderer.sprites:
+            if sprite.alive and sprite.is_enemy:
+                # Check if sprite is centered horizontally
+                if abs(sprite.screen_x - HALF_WIDTH) < sprite.sprite_half_width:
+                    if sprite.dist < min_dist:
+                        min_dist = sprite.dist
+                        target_sprite = sprite
+        
+        if target_sprite:
+            target_sprite.health -= 50 # Standard damage
+            if target_sprite.health <= 0:
+                target_sprite.alive = False

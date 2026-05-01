@@ -1,7 +1,7 @@
 import math
 
 # game settings
-RES = WIDTH, HEIGHT = 1200, 800
+RES = WIDTH, HEIGHT = 1280, 720 # Custom resolution
 HALF_WIDTH = WIDTH // 2
 HALF_HEIGHT = HEIGHT // 2
 FPS = 60
@@ -10,6 +10,7 @@ PLAYER_POS = 1.5, 1.5
 PLAYER_ANGLE = 0
 PLAYER_SPEED = 0.004
 PLAYER_ROT_SPEED = 0.002
+PLAYER_SIZE_SCALE = 60
 
 FOV = math.pi / 3
 HALF_FOV = FOV / 2
